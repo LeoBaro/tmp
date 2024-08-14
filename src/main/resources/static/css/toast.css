@@ -1,0 +1,25 @@
+.toast-container {
+    position: fixed;
+    top: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 9999;
+    /* Set a high z-index to ensure it's above other content */
+}
+
+.toast {
+    max-width: 600px !important;
+    width: 90% !important;
+    font-size: 24px !important;
+}
+
+.toast-header {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.toast-body {
+    background-color: #f8d7da;
+    color: #721c24;
+}
