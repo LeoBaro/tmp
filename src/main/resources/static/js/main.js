@@ -75,40 +75,6 @@ function sendStorageRequest(quantityFw) {
     });
 }
 
-// function sendChargeStatusRequest() {
-
-//     //request to server
-//     const relativeEndpoint = '/sendChargeStatusRequest';
-//     fetch(
-//         relativeEndpoint,
-//         {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: ""
-//         }
-//     ).then(response => {
-//         response.text().then((resolvedValue) => {
-
-//             if (!response.ok) {
-//                 showError(response.text());
-//             } else {
-//                 setTimeout(() => {
-//                     if (resolvedValue.includes("chargetaken")) {
-//                         showResponseChargeStatus("accepted")
-//                     } else {
-//                         showResponseChargeStatus("KO")
-//                     }
-//                 }, 2000);
-//             }
-//         });
-
-//     }).catch(error => {
-//         console.log(error);
-//     });
-// }
-
 function enterTicketRequest(inputValue) {
 
     const saveButton = document.querySelector("#sendTicketNumber");
@@ -181,6 +147,45 @@ function enterTicketRequest(inputValue) {
     });
 }
 
+function sendChargeStatusRequest() {
+
+    //request to server
+    const relativeEndpoint = '/sendChargeStatusRequest';
+    fetch(
+        relativeEndpoint,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: ""
+        }
+    ).then(response => {
+        response.text().then((resolvedValue) => {
+
+            if (!response.ok) {
+                showError(response.text());
+            } else {
+                setTimeout(() => {
+                    if (resolvedValue.includes("unload-completed")) {
+                        showResponseChargeStatus("unload-completed")
+                    }
+                    else if (resolvedValue.includes("in-progress")) {
+                        showResponseChargeStatus("in-progress")
+                    }          
+                    else {
+                        showResponseChargeStatus("KO")
+                    }
+                }, 2000);
+            }
+        });
+    }).catch(error => {
+        console.log(error);
+    });
+}
+
+
+
 function showResponseStorageRequest(response, ticketCode) {
     const responseBody = document.getElementById('responseBodyStorage');
     responseBody.style.display = "block";
@@ -212,11 +217,11 @@ function showResponseTicket(response) {
     const responseText = document.getElementById('responseTextTicket');
     if (response === "accepted") {
         setTimeout(() => {
-            responseText.innerHTML = "Your ticket has been accepted, the service is taking care of your load. <br> Wait until the handling is completed."
+            responseText.innerHTML = "CHARGE TAKEN! Your ticket has been accepted, the service is taking care of your load. <br> Wait until the handling is completed."
         }, 500);
-        // setTimeout(() => {
-        //     sendChargeStatusRequest();
-        // }, 1000);
+        setTimeout(() => {
+            sendChargeStatusRequest();
+        }, 5000);
     } else if (response === "rejected") {
         setTimeout(() => {
             responseText.innerHTML = "Your ticket has been rejected! <br>Check that you have entered it correctly."
@@ -230,34 +235,40 @@ function showResponseTicket(response) {
     }
 }
 
-// function showResponseChargeStatus(response) {
-//     const responseBody = document.getElementById('responseBodyChargeStatus');
-//     responseBody.style.display = "block";
-//     const responseText = document.getElementById('responseTextChargeStatus');
-//     if (response === "accepted") {
-//         setTimeout(() => {
-//             responseText.innerHTML = "Your load has been taken in charge from the service! <br> The page will be restored shortly: you can leave the INDOOR."
-//             countdownFail(window.reloadTime, "countdownChargeStatus");
-//             setTimeout(() => {
-//                 location.reload();
-//             }, reloadTime);
-//         }, 500);
-//     } else if (response === "KO") {
-//         setTimeout(() => {
-//             responseText.innerHTML = "The service encountered an issue and the load was not taken over! <br>The page will be restored shortly."
-//         }, 500);
-//         countdownFail(window.reloadTime, "countdownChargeStatus");
-//         setTimeout(() => {
-//             location.reload();
-//         }, reloadTime);
-//     } else {
-//         responseText.innerHTML = "Error during processing the handling of the load! <br>The page will be restored shortly."
-//         countdownFail(window.reloadTime, "countdownChargeStatus")
-//         setTimeout(() => {
-//             location.reload();
-//         }, reloadTime);
-//     }
-// }
+function showResponseChargeStatus(response) {
+    const responseBody = document.getElementById('responseBodyChargeStatus');
+    responseBody.style.display = "block";
+    const responseText = document.getElementById('responseTextChargeStatus');
+    console.log("response:",response)
+    if (response === "unload-completed") {
+        setTimeout(() => {
+            responseText.innerHTML = "Unloading has completed! You can leave the INDOOR.</br>"
+            const reloadButton = document.querySelector("#reload");
+            reloadButton.firstElementChild.removeAttribute("hidden");
+        }, 500);
+    } else if (response === "in-progress") {
+        setTimeout(() => {
+            responseText.innerHTML = "The service is STILL taking care of your load. <br> Wait until the handling is completed."
+        }, 500);
+        setTimeout(() => {
+            sendChargeStatusRequest();
+        }, 5000);
+    } else if (response === "KO") {
+        setTimeout(() => {
+            responseText.innerHTML = "The service encountered an issue and the load was not taken over! <br>The page will be restored shortly."
+        }, 500);
+        countdownFail(window.reloadTime, "countdownChargeStatus");
+        setTimeout(() => {
+            location.reload();
+        }, reloadTime);
+    } else {
+        responseText.innerHTML = "Error during processing the handling of the load! <br>The page will be restored shortly."
+        countdownFail(window.reloadTime, "countdownChargeStatus")
+        setTimeout(() => {
+            location.reload();
+        }, reloadTime);
+    }
+ }
 
 function validateInput() {
     const inputElement = document.getElementById('quantity');
@@ -328,9 +339,6 @@ function countdownFail(time, countdownElement) {
 
 function getColdRoomAvailability() {
 
-    const spinner = document.querySelector('.spinner-border');
-    spinner.removeAttribute('hidden');
-
     const relativeEndpoint = '/availability';
     fetch(
         relativeEndpoint,
@@ -347,11 +355,12 @@ function getColdRoomAvailability() {
                 showError(response.text());
             } else {
                 setTimeout(() => {
-                    console.log("availability:",resolvedValue)
-                    //var availabilityTmp = resolvedValue.split("(")[2]
-                    //var availability = availabilityTmp.split(")")[0]
-                    //showAvailability("accepted", availability)
-                }, 2000);
+                    var availabilityTmp = resolvedValue.split("(")[2]
+                    availabilityTmp = availabilityTmp.split(")")[0]
+                    var availability_kg = parseFloat(availabilityTmp.split(",")[0])
+                    var max_kg = parseFloat(availabilityTmp.split(",")[1])
+                    showAvailability(availability_kg, max_kg)
+                }, 4000);
             }
         });
 
@@ -360,7 +369,13 @@ function getColdRoomAvailability() {
     });
 }
 
-
+function showAvailability(availability_kg, max_kg) {
+    var stored = max_kg - availability_kg
+    const maxKgElement = document.getElementById('max_kg');
+    const actualKgElement = document.getElementById('actual_kg');
+    maxKgElement.innerHTML = max_kg + " kg";
+    actualKgElement.innerHTML = stored + " kg";
+}
 
 function startPeriodicRequests(intervalInSeconds) {
     const intervalInMilliseconds = intervalInSeconds * 1000;
@@ -368,4 +383,4 @@ function startPeriodicRequests(intervalInSeconds) {
         getColdRoomAvailability();
     }, intervalInMilliseconds);
 }
-//startPeriodicRequests(2); 
+startPeriodicRequests(2); 

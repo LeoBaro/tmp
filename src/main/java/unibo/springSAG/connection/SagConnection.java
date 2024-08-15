@@ -58,16 +58,16 @@ public class SagConnection extends ConnectionUtils {
         return null;
     }
 
-    // public String sendChargeStatusRequest(Interaction conn) {
-    //     String functionName = "sendChargeStatusRequest";
-    //     try {
-    //         String msg = "" + CommUtils.buildRequest("ServiceAccessGUI", "chargestatus", "chargestatus(arg)", actorName);
-    //         return sendRequest(conn, msg, functionName);
-    //     } catch (Exception e) {
-    //         CommUtils.outred(className + " " + functionName + " | ERROR: " + e.getMessage());
-    //     }
-    //     return null;
-    // }
+    public String sendChargeStatusRequest(Interaction conn) {
+        String functionName = "sendChargeStatusRequest";
+        try {
+            String msg = "" + CommUtils.buildRequest("ServiceAccessGUI", "getticketstatus", "getticketstatus(arg)", actorName);
+            return sendRequest(conn, msg, functionName);
+        } catch (Exception e) {
+            CommUtils.outred(className + " " + functionName + " | ERROR: " + e.getMessage());
+        }
+        return null;
+    }
 
     public String enterTicketRequest(Interaction conn, String ticketCode) {
         String functionName = "enterTicketRequest";

@@ -27,7 +27,7 @@ public class SagController {
     @Value("${spring.application.name}")
     String appName;
     private SagConnection sagConnection;
-    //private CoapConnection observerConn;
+    private CoapConnection observerConn;
     private Interaction requestConnToTicketService;
     private Interaction requestConnToColdRoom;
 
@@ -37,7 +37,7 @@ public class SagController {
         System.out.println(className + " | constructor");
         this.sagConnection = sagConnection;
         System.out.println(className + " | sagConnection: " + sagConnection);
-        //this.observerConn = sagConnection.connectLocalActorUsingCoap();
+        //this.observerConn = sagConnection.connectLocalActorUsingCoap("ticketservice");
         //observerConn.observeResource(new CoapObserver());
         this.requestConnToTicketService = sagConnection.connectLocalActorUsingCoap("ticketservice");
         this.requestConnToColdRoom = sagConnection.connectLocalActorUsingCoap("coldroom");
@@ -47,17 +47,18 @@ public class SagController {
 
     @GetMapping("/")
     public String homePage(Model model) {
+        /* 
         String temp = "ERROR";
         String actual = "ERROR";
 
         model.addAttribute("arg", appName);
+
 
         if (this.requestConnToTicketService == null) {
             model.addAttribute("tempCurrentColdRoom", temp);
             model.addAttribute("actualCurrentColdRoom", actual);
         }
 
-        /* 
         String answer = sagConnection.sendInitColdRoom(this.requestConnToTicketService);
         if (answer == null) {
             model.addAttribute("tempCurrentColdRoom", temp);
@@ -95,19 +96,6 @@ public class SagController {
         return new ResponseEntity<>(className + " sendStorageRequest | answer: " + answer, headers, HttpStatus.OK);
     }
 
-    // @PostMapping(value = "/sendChargeStatusRequest")
-    // public ResponseEntity<String> sendChargeStatusRequest() {
-
-    //     String answer = sagConnection.sendChargeStatusRequest(this.requestConnToTicketService);
-    //     if (answer == null) {
-    //         HttpHeaders headers = new HttpHeaders();
-    //         return new ResponseEntity<>(className + " sendChargeStatusRequest | ERROR: response null", headers, HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-
-    //     HttpHeaders headers = new HttpHeaders();
-    //     return new ResponseEntity<>(className + " sendChargeStatusRequest | answer: " + answer, headers, HttpStatus.OK);
-    // }
-
     @PostMapping(value = "/enterTicketRequest", consumes = "application/json")
     public ResponseEntity<String> enterTicketRequest(@RequestBody TicketRequest ticketrequest) {
         if (ticketrequest == null || ticketrequest.getTicketCode() == null || ticketrequest.getTicketCode().isEmpty()) {
@@ -139,7 +127,7 @@ public class SagController {
             return new ResponseEntity<>(className + " sendStorageRequest | ERROR: requestConnToColdRoom connection null", headers, HttpStatus.NOT_FOUND);
         }
 
-        String answer = sagConnection.askAvailability(this.requestConnToTicketService);
+        String answer = sagConnection.askAvailability(this.requestConnToColdRoom);
         if (answer == null) {
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(className + " sendStorageRequest | ERROR: response null", headers, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -148,4 +136,19 @@ public class SagController {
         HttpHeaders headers = new HttpHeaders();
         return new ResponseEntity<>(className + " sendStorageRequest | answer: " + answer, headers, HttpStatus.OK);
     }
+
+
+    @PostMapping(value = "/sendChargeStatusRequest")
+    public ResponseEntity<String> sendChargeStatusRequest() {
+
+        String answer = sagConnection.sendChargeStatusRequest(this.requestConnToTicketService);
+        if (answer == null) {
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<>(className + " sendChargeStatusRequest | ERROR: response null", headers, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        return new ResponseEntity<>(className + " sendChargeStatusRequest | answer: " + answer, headers, HttpStatus.OK);
+    }
+
 }

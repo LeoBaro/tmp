@@ -16,21 +16,21 @@
 <body>
 <div class="container">
     <div class="title">
-        <h1 class="text-center"><span class="gray" th:text="${arg}">Application name</span></h1>
-        <h3 class="text-center">Deposit request simulation</h3>
+        <h1 class="text-center"><span class="yellow" th:text="${arg}">Application name</span></h1>
+        <h3 class="text-center">store request</h3>
     </div>
 
     <section>
         <div>
-            <label id="label">Total weight in <i>ColdRoom</i></label>
+            <label id="label">Status of ColdRoom</label>
         </div>
 
         <div class="span">
-            <label for="temp">Reserved: <span class="gray" id="temp" th:text="${tempCurrentColdRoom}"></span></label>
+            <label for="temp">Max capacity: <span class="gray" id="max_kg"></span></label>
         </div>
 
         <div class="span">
-            <label for="actual">Actually stored: <span class="gray" id="actual" th:text="${actualCurrentColdRoom}"></span></label>
+            <label for="actual">Actually stored: <span class="gray" id="actual_kg"></span></label>
         </div>
     </section>
 
@@ -74,6 +74,9 @@
         <div>
             <label id="responseTextChargeStatus" class="form-label"></label>
             <div class="countdown" id="countdownChargeStatus"></div>
+            <button id="reload" class="btn btn-primary mt-3" onclick="location.reload()">
+                <span class="save-status-span" role="status" id="save-status">Leave INDOOR</span>
+            </button>
         </div>
     </div>
 
